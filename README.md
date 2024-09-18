@@ -26,11 +26,11 @@
 
     1. Clone o repositório:
        ```bash
-       git clone https://github.com/Jadglas/podcasts-free
+       git clone https://github.com/Jadglas/podcasts-free.git
        ```
     2. Navegue até o diretório do projeto:
        ```bash
-       cd podcast-app
+       cd podcasts-free
        ```
     3. Abra o arquivo `index.html` em seu navegador.
 
@@ -62,11 +62,11 @@
 
     ## Licença
 
-    Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+    Este projeto está licenciado sob a GPL-3.0 License - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
     ## Contato
 
     Se você tiver alguma dúvida ou sugestão, sinta-se à vontade para entrar em contato:
-    - Seu Nome - seu-email@example.com
+    - **Jadglas** - jadglas@hotmail.com
 
     Obrigado por usar o App de Podcasts!
