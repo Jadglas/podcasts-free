@@ -1,0 +1,228 @@
+
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>App de Podcasts - Página Inicial</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: #f9fafb;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="text-center">
+            <h1 class="text-4xl font-bold mb-4">Bem-vindo ao App de Podcasts!</h1>
+            <p class="mb-4">Descubra, ouça e gerencie seus podcasts favoritos de forma simples e rápida.</p>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="showAuthSection()">Começar</button>
+        </div>
+
+        <div id="authSection" style="display:none;">
+            <h2 class="text-xl font-bold mb-2">Criar Conta</h2>
+            <input type="text" id="username" placeholder="Nome de Usuário" class="border p-2 mb-2 w-80" />
+            <input type="email" id="email" placeholder="E-mail" class="border p-2 mb-2 w-80" />
+            <input type="password" id="password" placeholder="Senha" class="border p-2 mb-2 w-80" />
+            <input type="date" id="birthday" class="border p-2 mb-2 w-80" />
+            <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="createAccount()">Criar Conta</button>
+            <h2 class="text-xl font-bold mt-4">Login</h2>
+            <input type="text" id="loginUsername" placeholder="Nome de Usuário" class="border p-2 mb-2 w-80" />
+            <input type="password" id="loginPassword" placeholder="Senha" class="border p-2 mb-2 w-80" />
+            <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="login()">Login</button>
+            <button class="bg-yellow-500 text-white px-4 py-2 rounded mt-2" onclick="recoverPassword()">Recuperar Senha</button>
+        </div>
+
+        <div id="podcastSection" style="display:none;">
+            <input type="text" id="rssUrl" placeholder="Cole o URL do feed RSS" class="border p-2 mb-4 w-80" />
+            <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="fetchPodcasts()">Carregar Podcasts</button>
+            <div id="podcastList" class="mt-4"></div>
+            <h2 class="text-xl font-bold mt-6">Favoritos</h2>
+            <div id="favoritesList" class="mt-4"></div>
+        </div>
+
+        <script>
+            const favorites = new Set();
+
+            function showAuthSection() {
+                document.querySelector('div.text-center').style.display = 'none';
+                document.getElementById('authSection').style.display = 'block';
+            }
+
+            function createAccount() {
+                const username = document.getElementById('username').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const birthday = document.getElementById('birthday').value;
+
+                if (username && email && password && birthday) {
+                    const userId = Date.now(); // Gera um ID único baseado no timestamp
+                    const registrationDate = new Date().toISOString().split('T')[0]; // Data de registro
+                    const userData = {
+                        userId,
+                        email,
+                        password,
+                        registrationDate,
+                        birthday,
+                        favorites: []
+                    };
+                    localStorage.setItem(username, JSON.stringify(userData));
+                    alert('Conta criada com sucesso!');
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('podcastSection').style.display = 'block'; // Redireciona para a seção de podcasts
+                } else {
+                    alert('Por favor, preencha todos os campos.');
+                }
+            }
+
+            function login() {
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+
+                const userData = JSON.parse(localStorage.getItem(username));
+                if (userData && userData.password === password) {
+                    alert('Login bem-sucedido!');
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('podcastSection').style.display = 'block';
+                    loadFavorites(userData.favorites);
+                } else {
+                    alert('Nome de usuário ou senha incorretos.');
+                }
+            }
+
+            function recoverPassword() {
+                const email = prompt('Digite seu e-mail para recuperação de senha:');
+                const users = Object.keys(localStorage);
+                let userFound = false;
+
+                for (const username of users) {
+                    const userData = JSON.parse(localStorage.getItem(username));
+                    if (userData.email === email) {
+                        const newPassword = prompt('Digite a nova senha:');
+                        if (newPassword) {
+                            userData.password = newPassword;
+                            localStorage.setItem(username, JSON.stringify(userData));
+                            alert('Senha atualizada com sucesso!');
+                        }
+                        userFound = true;
+                        break;
+                    }
+                }
+
+                if (!userFound) {
+                    alert('E-mail não encontrado.');
+                }
+            }
+
+            function loadFavorites(favoritesArray) {
+                favoritesArray.forEach(favorite => favorites.add(favorite));
+                updateFavoritesList();
+            }
+
+            async function fetchPodcasts() {  
+                const url = document.getElementById('rssUrl').value;  
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // Proxy para contornar CORS  
+                try {  
+                    const response = await fetch(proxyUrl + url);  
+                    const contentType = response.headers.get("content-type");  
+
+                    if (contentType.includes("application/rss+xml") || contentType.includes("text/xml")) {  
+                        const xmlText = await response.text();  
+                        parseXML(xmlText);  
+                    } else {  
+                        const jsonResponse = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&api_key=YOUR_API_KEY`);  
+                        const data = await jsonResponse.json();  
+                        if (data.status === 'ok') {  
+                            displayPodcasts(data.items);  
+                        } else {  
+                            alert('Erro ao carregar o feed RSS.');  
+                        }  
+                    }  
+                } catch (error) {  
+                    alert('Erro ao carregar o feed: ' + error.message);  
+                }  
+            }
+
+            function parseXML(xmlText) {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                const items = xmlDoc.getElementsByTagName("item");
+                const podcasts = Array.from(items).map(item => ({
+                    title: item.getElementsByTagName("title")[0].textContent,
+                    link: item.getElementsByTagName("enclosure")[0].getAttribute("url")
+                }));
+                displayPodcasts(podcasts);
+            }
+
+            function displayPodcasts(podcasts) {
+                const podcastList = document.getElementById('podcastList');
+                podcastList.innerHTML = '';
+                podcasts.forEach(podcast => {
+                    const podcastItem = document.createElement('div');
+                    podcastItem.className = 'mb-4';
+                    podcastItem.innerHTML = `
+                        <h2 class="font-semibold">${podcast.title}</h2>
+                        <audio controls>
+                            <source src="${podcast.link}" type="audio/mpeg">
+                            Seu navegador não suporta o elemento de áudio.
+                        </audio>
+                        <button class="bg-green-500 text-white px-2 py-1 rounded ml-2" onclick="toggleFavorite('${podcast.title}', '${podcast.link}')">
+                            ${favorites.has(podcast.title) ? 'Remover Favorito' : 'Adicionar Favorito'}
+                        </button>
+                    `;
+                    podcastList.appendChild(podcastItem);
+                });
+            }
+
+            function toggleFavorite(title, link) {
+                const favoriteKey = `${title}-${link}`;
+                if (favorites.has(favoriteKey)) {
+                    favorites.delete(favoriteKey);
+                } else {
+                    favorites.add(favoriteKey);
+                }
+                updateFavoritesList();
+            }
+
+            function updateFavoritesList() {
+                const favoritesList = document.getElementById('favoritesList');
+                favoritesList.innerHTML = '';
+                favorites.forEach(favorite => {
+                    const favoriteItem = document.createElement('div');
+                    favoriteItem.className = 'mb-2';
+                    favoriteItem.innerHTML = favorite;
+                    favoritesList.appendChild(favoriteItem);
+                });
+            }
+        </script>
+    <script>window.parent.postMessage({ action: "ready" }, "*"); 
+ 
+window.console = new Proxy(console, {
+  get(target, prop) {
+    if (['log', 'warn', 'error'].includes(prop)) {
+      return new Proxy(target[prop], {
+        apply(fn, thisArg, args) {
+          fn.apply(thisArg, args);
+          window.parent.postMessage({ action: 'console', 
+            type: prop, 
+            args: args.map((arg) => {
+              try {
+                return JSON.stringify(arg).replace(/^["']|["']$/g, '');
+              } catch (e) {
+                return arg;
+              }
+            }) 
+          }, '*');
+        }
+      });
+    }
+    return target[prop];
+  }
+});
+</script></body>
+    </html>
