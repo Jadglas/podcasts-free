@@ -1,25 +1,72 @@
-Como Usar:
 
-- Cole o URL do feed RSS mencionado acima no campo de entrada do seu aplicativo.
-- Clique no botão "Carregar Podcasts."
-- Os episódios devem ser listados, e você poderá reproduzir os áudios diretamente na interface do aplicativo.
-  
-Observação:
+    # App de Podcasts
 
-  Se você deseja adicionar o segundo URL (que é apenas uma página web do podcast) ao seu aplicativo, precisará obter o feed RSS diretamente associado a esse podcast, que é o que já foi fornecido.
+    Bem-vindo ao App de Podcasts! Este aplicativo permite que os usuários descubram, ouçam e gerenciem seus podcasts favoritos de forma simples e rápida. Com uma interface amigável e funcionalidades úteis, você pode buscar podcasts, adicionar aos favoritos e até mesmo buscar diretamente no Google caso não encontre o que procura.
 
-Funcionalidades:
+    ## Funcionalidades
 
-- Página Inicial: Uma página inicial foi adicionada, apresentando o aplicativo e suas funcionalidades.
-- Navegação: Um botão "Começar" que leva o usuário à seção de autenticação (login/cadastro).
-- Favoritos: Agora, cada episódio tem um botão para adicionar ou remover da lista de favoritos.
-- Lista de Favoritos: Os episódios favoritos são exibidos em uma seção separada.
-- Criação de Conta: Os usuários podem criar uma conta fornecendo um nome de usuário e uma senha.
-- Login: Os usuários podem fazer login usando suas credenciais.
-- Registro de Usuário: Ao criar uma conta, o aplicativo atribui um ID único, registra a data de registro e a data de aniversário.
-- Campo de E-mail: Um campo de e-mail foi adicionado ao formulário de registro, permitindo que o usuário vincule sua conta a um e-mail.
-- Recuperação de Senha: A função de recuperação de senha agora solicita o e-mail do usuário e permite que ele redefina a senha se o e-mail estiver vinculado a uma conta.
-- Redirecionamento Após Cadastro: Após a criação da conta, o usuário é redirecionado automaticamente para a seção de pesquisa de podcasts
-- Armazenamento de Podcasts Favoritos: Os favoritos são armazenados junto com as informações do usuário.
-- Recuperação de Senha: Os usuários podem redefinir suas senhas.
-- Seção de Podcasts: Após o login bem-sucedido, a seção de podcasts é exibida.
+    - **Busca de Podcasts**: Pesquise podcasts usando a API do Listen Notes.
+    - **Favoritos**: Adicione podcasts aos seus favoritos para fácil acesso.
+    - **Busca no Google**: Se nenhum resultado for encontrado na API, o aplicativo abrirá uma nova aba com resultados do Google.
+    - **Autenticação de Usuário**: Crie uma conta, faça login e gerencie suas informações.
+
+    ## Tecnologias Utilizadas
+
+    - HTML
+    - CSS (Tailwind CSS)
+    - JavaScript
+    - API do Listen Notes
+
+    ## Pré-requisitos
+
+    - Um navegador moderno (Chrome, Firefox, etc.)
+    - Conexão à internet
+
+    ## Instalação
+
+    1. Clone o repositório:
+       ```bash
+       git clone https://github.com/seu-usuario/podcast-app.git
+       ```
+    2. Navegue até o diretório do projeto:
+       ```bash
+       cd podcast-app
+       ```
+    3. Abra o arquivo `index.html` em seu navegador.
+
+    ## Uso
+
+    1. Ao abrir o aplicativo, você verá a página inicial. Clique em "Começar" para criar uma conta ou fazer login.
+    2. Após o login, você pode buscar podcasts digitando o nome na barra de pesquisa.
+    3. Adicione podcasts aos seus favoritos clicando no botão correspondente.
+    4. Se não encontrar resultados, o aplicativo buscará no Google.
+
+    ## Contribuição
+
+    Contribuições são bem-vindas! Se você deseja contribuir para este projeto, siga estas etapas:
+
+    1. Faça um fork do repositório.
+    2. Crie uma nova branch:
+       ```bash
+       git checkout -b minha-nova-feature
+       ```
+    3. Faça suas alterações e commit:
+       ```bash
+       git commit -m 'Adiciona nova feature'
+       ```
+    4. Envie para o repositório remoto:
+       ```bash
+       git push origin minha-nova-feature
+       ```
+    5. Abra um Pull Request.
+
+    ## Licença
+
+    Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+    ## Contato
+
+    Se você tiver alguma dúvida ou sugestão, sinta-se à vontade para entrar em contato:
+    - Seu Nome - seu-email@example.com
+
+    Obrigado por usar o App de Podcasts!
