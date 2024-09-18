@@ -1,0 +1,267 @@
+
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>App de Podcasts - Página Inicial</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: #f9fafb;
+            }
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: #f87171; /* Vermelho claro */
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                display: none; /* Inicialmente oculto */
+                z-index: 1000;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="notification" id="errorPopup">
+            <span id="errorMessage"></span>
+            <button onclick="closePopup()" class="ml-2 bg-red-600 text-white px-2 py-1 rounded">X</button>
+        </div>
+
+        <div class="text-center">
+            <h1 class="text-4xl font-bold mb-4">Bem-vindo ao App de Podcasts!</h1>
+            <p class="mb-4">Descubra, ouça e gerencie seus podcasts favoritos de forma simples e rápida.</p>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="showAuthSection()">Começar</button>
+        </div>
+
+        <div id="authSection" style="display:none;">
+            <h2 class="text-xl font-bold mb-2">Criar Conta</h2>
+            <input type="text" id="username" placeholder="Nome de Usuário" class="border p-2 mb-2 w-80" onkeypress="handleKeyPress(event, 'create')"/>
+            <input type="email" id="email" placeholder="E-mail" class="border p-2 mb-2 w-80" onkeypress="handleKeyPress(event, 'create')"/>
+            <input type="password" id="password" placeholder="Senha" class="border p-2 mb-2 w-80" onkeypress="handleKeyPress(event, 'create')"/>
+            <input type="date" id="birthday" class="border p-2 mb-2 w-80" onkeypress="handleKeyPress(event, 'create')"/>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="createAccount()">Criar Conta</button>
+            <h2 class="text-xl font-bold mt-4">Login</h2>
+            <input type="text" id="loginUsername" placeholder="Nome de Usuário" class="border p-2 mb-2 w-80" onkeypress="handleKeyPress(event, 'login')"/>
+            <input type="password" id="loginPassword" placeholder="Senha" class="border p-2 mb-2 w-80" onkeypress="handleKeyPress(event, 'login')"/>
+            <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="login()">Login</button>
+            <button class="bg-yellow-500 text-white px-4 py-2 rounded mt-2" onclick="recoverPassword()">Recuperar Senha</button>
+        </div>
+
+        <div id="podcastSection" style="display:none;">
+            <h2 class="text-xl font-bold mt-6">Buscar Podcast</h2>
+            <input type="text" id="podcastSearch" placeholder="Digite o nome do podcast" class="border p-2 mb-2 w-80" />
+            <button class="bg-purple-500 text-white px-4 py-2 rounded" onclick="searchPodcast()">Buscar</button>
+            <div id="searchResults" class="mt-4"></div>
+            <h2 class="text-xl font-bold mt-6">Favoritos</h2>
+            <div id="favoritesList" class="mt-4"></div>
+        </div>
+
+        <script>
+            const favorites = new Set();
+
+            function showAuthSection() {
+                document.querySelector('div.text-center').style.display = 'none';
+                document.getElementById('authSection').style.display = 'block';
+            }
+
+            function handleKeyPress(event, action) {
+                if (event.key === 'Enter') {
+                    if (action === 'create') {
+                        createAccount();
+                    } else if (action === 'login') {
+                        login();
+                    }
+                }
+            }
+
+            function showError(message) {
+                const errorPopup = document.getElementById('errorPopup');
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.textContent = message;
+                errorPopup.style.display = 'block';
+            }
+
+            function closePopup() {
+                document.getElementById('errorPopup').style.display = 'none';
+            }
+
+            function createAccount() {
+                const username = document.getElementById('username').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const birthday = document.getElementById('birthday').value;
+
+                if (username && email && password && birthday) {
+                    const userId = Date.now(); // Gera um ID único baseado no timestamp
+                    const registrationDate = new Date().toISOString().split('T')[0]; // Data de registro
+                    const userData = {
+                        userId,
+                        email,
+                        password,
+                        registrationDate,
+                        birthday,
+                        favorites: []
+                    };
+                    localStorage.setItem(username, JSON.stringify(userData));
+                    alert('Conta criada com sucesso!');
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('podcastSection').style.display = 'block'; // Redireciona para a seção de podcasts
+                } else {
+                    showError('Por favor, preencha todos os campos.');
+                }
+            }
+
+            function login() {
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+
+                const userData = JSON.parse(localStorage.getItem(username));
+                if (userData && userData.password === password) {
+                    alert('Login bem-sucedido!');
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('podcastSection').style.display = 'block';
+                    loadFavorites(userData.favorites);
+                } else {
+                    showError('Nome de usuário ou senha incorretos.');
+                }
+            }
+
+            function recoverPassword() {
+                const email = prompt('Digite seu e-mail para recuperação de senha:');
+                const users = Object.keys(localStorage);
+                let userFound = false;
+
+                for (const username of users) {
+                    const userData = JSON.parse(localStorage.getItem(username));
+                    if (userData.email === email) {
+                        const newPassword = prompt('Digite a nova senha:');
+                        if (newPassword) {
+                            userData.password = newPassword;
+                            localStorage.setItem(username, JSON.stringify(userData));
+                            alert('Senha atualizada com sucesso!');
+                        }
+                        userFound = true;
+                        break;
+                    }
+                }
+
+                if (!userFound) {
+                    showError('E-mail não encontrado.');
+                }
+            }
+
+            function loadFavorites(favoritesArray) {
+                favoritesArray.forEach(favorite => favorites.add(favorite));
+                updateFavoritesList();
+            }
+
+            async function searchPodcast() {
+                const query = document.getElementById('podcastSearch').value;
+                const apiKey = 'YOUR_API_KEY'; // Substitua pela sua chave da API Listen Notes
+                const apiUrl = `https://cors-anywhere.herokuapp.com/https://api.listernotes.com/api/v2/search?q=${encodeURIComponent(query)}&sort_by_date=0`;
+
+                if (query) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            headers: {
+                                'X-ListenAPI-Key': apiKey
+                            }
+                        });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Erro na resposta da API: ${errorText}`);
+                        }
+                        const contentType = response.headers.get("content-type");
+                        if (!contentType || !contentType.includes("application/json")) {
+                            const errorText = await response.text();
+                            throw new Error(`Resposta não JSON: ${errorText}`);
+                        }
+                        const data = await response.json();
+                        if (data.results.length === 0) {
+                            // Se não houver resultados, busca no Google
+                            window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}+podcast`, '_blank');
+                        } else {
+                            displaySearchResults(data.results);
+                        }
+                    } catch (error) {
+                        showError('Erro ao buscar podcasts: ' + error.message);
+                    }
+                } else {
+                    showError('Por favor, digite o nome do podcast que deseja buscar.');
+                }
+            }
+
+            function displaySearchResults(results) {
+                const searchResults = document.getElementById('searchResults');
+                searchResults.innerHTML = '';
+                results.forEach(result => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'mb-4';
+                    resultItem.innerHTML = `
+                        <h2 class="font-semibold">${result.title}</h2>
+                        <audio controls>
+                            <source src="${result.audio}" type="audio/mpeg">
+                            Seu navegador não suporta o elemento de áudio.
+                        </audio>
+                        <button class="bg-green-500 text-white px-2 py-1 rounded ml-2" onclick="toggleFavorite('${result.title}', '${result.audio}')">
+                            ${favorites.has(result.title) ? 'Remover Favorito' : 'Adicionar Favorito'}
+                        </button>
+                    `;
+                    searchResults.appendChild(resultItem);
+                });
+            }
+
+            function toggleFavorite(title, link) {
+                const favoriteKey = `${title}-${link}`;
+                if (favorites.has(favoriteKey)) {
+                    favorites.delete(favoriteKey);
+                } else {
+                    favorites.add(favoriteKey);
+                }
+                updateFavoritesList();
+            }
+
+            function updateFavoritesList() {
+                const favoritesList = document.getElementById('favoritesList');
+                favoritesList.innerHTML = '';
+                favorites.forEach(favorite => {
+                    const favoriteItem = document.createElement('div');
+                    favoriteItem.className = 'mb-2';
+                    favoriteItem.innerHTML = favorite;
+                    favoritesList.appendChild(favoriteItem);
+                });
+            }
+        </script>
+    <script>window.parent.postMessage({ action: "ready" }, "*"); 
+ 
+window.console = new Proxy(console, {
+  get(target, prop) {
+    if (['log', 'warn', 'error'].includes(prop)) {
+      return new Proxy(target[prop], {
+        apply(fn, thisArg, args) {
+          fn.apply(thisArg, args);
+          window.parent.postMessage({ action: 'console', 
+            type: prop, 
+            args: args.map((arg) => {
+              try {
+                return JSON.stringify(arg).replace(/^["']|["']$/g, '');
+              } catch (e) {
+                return arg;
+              }
+            }) 
+          }, '*');
+        }
+      });
+    }
+    return target[prop];
+  }
+});
+</script></body>
+    </html>
