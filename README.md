@@ -26,7 +26,7 @@
 
     1. Clone o repositório:
        ```bash
-       git clone https://github.com/seu-usuario/podcast-app.git
+       git clone https://github.com/Jadglas/podcasts-free
        ```
     2. Navegue até o diretório do projeto:
        ```bash
